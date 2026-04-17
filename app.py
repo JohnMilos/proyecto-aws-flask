@@ -4,9 +4,25 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Arrays en memoria
-alumnos = []
-profesores = []
+# Arrays en memoria con datos iniciales ID=1
+alumnos = [
+    {
+        "id": 1,
+        "nombres": "Alumno",
+        "apellidos": "Prueba",
+        "matricula": "A0001",
+        "promedio": 8.5
+    }
+]
+profesores = [
+    {
+        "id": 1,
+        "numeroEmpleado": "P0001",
+        "nombres": "Profesor",
+        "apellidos": "Prueba",
+        "horasClase": 20
+    }
+]
 
 # ------------------- ALUMNOS -------------------
 @app.route('/alumnos', methods=['GET'])
@@ -24,14 +40,29 @@ def get_alumno(id):
 def create_alumno():
     data = request.get_json()
     
-    # Validaciones
-    campos_requeridos = ['nombres', 'apellidos', 'matricula']
+    campos_requeridos = ['nombres', 'apellidos', 'matricula', 'promedio']
     for campo in campos_requeridos:
-        if campo not in data or not data[campo] or not isinstance(data[campo], str):
-            return jsonify({'error': f'Campo {campo} es requerido y debe ser string'}), 400
+        if campo not in data or data[campo] is None:
+            return jsonify({'error': f'Campo {campo} es requerido'}), 400
     
-    if 'promedio' not in data or not isinstance(data['promedio'], (int, float)):
-        return jsonify({'error': 'Campo promedio es requerido y debe ser numérico'}), 400
+    if isinstance(data['matricula'], (int, float)):
+        data['matricula'] = str(data['matricula'])
+    
+    for campo in ['nombres', 'apellidos', 'matricula']:
+        valor = data[campo]
+        if isinstance(valor, str):
+            if valor.strip() == '':
+                return jsonify({'error': f'Campo {campo} no puede estar vacío'}), 400
+        else:
+            data[campo] = str(valor)
+            if data[campo].strip() == '':
+                return jsonify({'error': f'Campo {campo} no puede estar vacío'}), 400
+    
+    try:
+        promedio = float(data['promedio'])
+        data['promedio'] = promedio
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Campo promedio debe ser un número válido'}), 400
     
     nuevo_id = max([a['id'] for a in alumnos], default=0) + 1
     nuevo_alumno = {
@@ -99,13 +130,29 @@ def get_profesor(id):
 def create_profesor():
     data = request.get_json()
     
-    campos_requeridos = ['numeroEmpleado', 'nombres', 'apellidos']
+    campos_requeridos = ['numeroEmpleado', 'nombres', 'apellidos', 'horasClase']
     for campo in campos_requeridos:
-        if campo not in data or not data[campo] or not isinstance(data[campo], str):
-            return jsonify({'error': f'Campo {campo} es requerido y debe ser string'}), 400
+        if campo not in data or data[campo] is None:
+            return jsonify({'error': f'Campo {campo} es requerido'}), 400
     
-    if 'horasClase' not in data or not isinstance(data['horasClase'], (int, float)):
-        return jsonify({'error': 'Campo horasClase es requerido y debe ser numérico'}), 400
+    if isinstance(data['numeroEmpleado'], (int, float)):
+        data['numeroEmpleado'] = str(data['numeroEmpleado'])
+    
+    for campo in ['numeroEmpleado', 'nombres', 'apellidos']:
+        valor = data[campo]
+        if isinstance(valor, str):
+            if valor.strip() == '':
+                return jsonify({'error': f'Campo {campo} no puede estar vacío'}), 400
+        else:
+            data[campo] = str(valor)
+            if data[campo].strip() == '':
+                return jsonify({'error': f'Campo {campo} no puede estar vacío'}), 400
+    
+    try:
+        horas = float(data['horasClase'])
+        data['horasClase'] = horas
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Campo horasClase debe ser un número válido'}), 400
     
     nuevo_id = max([p['id'] for p in profesores], default=0) + 1
     nuevo_profesor = {
