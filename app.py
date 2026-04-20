@@ -46,9 +46,10 @@ def create_alumno():
     # promedio debe ser numero
     try:
         promedio = float(data.get('promedio'))
+        if promedio.is_integer():
+            promedio = int(promedio)
     except (ValueError, TypeError):
-        return jsonify({'error': 'Campo promedio debe ser un numero valido'}), 400
-    
+        return jsonify({'error': 'Campo promedio debe ser un numero valido'}), 400    
     # Usar el id enviado si existe, sino generar uno nuevo
     nuevo_id = data.get('id')
     if nuevo_id is None:
@@ -101,10 +102,12 @@ def update_alumno(id):
     
     if 'promedio' in data:
         try:
-            alumno['promedio'] = float(data['promedio'])
+            promedio = float(data['promedio'])
+            if promedio.is_integer():
+                promedio = int(promedio)
+            alumno['promedio'] = promedio
         except (ValueError, TypeError):
-            return jsonify({'error': 'promedio debe ser un numero valido'}), 400
-    
+            return jsonify({'error': 'promedio debe ser un numero valido'}), 400    
     return jsonify(alumno), 200
 
 @app.route('/alumnos/<int:id>', methods=['DELETE'])
@@ -150,9 +153,13 @@ def create_profesor():
     
     try:
         horas = float(data.get('horasClase'))
+        # Convertir a entero si no tiene parte decimal
+        if horas.is_integer():
+            horas = int(horas)
     except (ValueError, TypeError):
         return jsonify({'error': 'Campo horasClase debe ser un numero valido'}), 400
-    
+
+   
     nuevo_id = data.get('id')
     if nuevo_id is None:
         nuevo_id = max([p['id'] for p in profesores], default=0) + 1
@@ -204,10 +211,12 @@ def update_profesor(id):
     
     if 'horasClase' in data:
         try:
-            profesor['horasClase'] = float(data['horasClase'])
+            horas = float(data['horasClase'])
+            if horas.is_integer():
+                horas = int(horas)
+            profesor['horasClase'] = horas
         except (ValueError, TypeError):
-            return jsonify({'error': 'horasClase debe ser un numero valido'}), 400
-    
+            return jsonify({'error': 'horasClase debe ser un numero valido'}), 400    
     return jsonify(profesor), 200
 
 @app.route('/profesores/<int:id>', methods=['DELETE'])
